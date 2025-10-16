@@ -4,8 +4,8 @@ console.log("Hello");
 console.log("This is my First Programe");
 
 
-const num1 = 5;
-const num2 = 4;
+const num1 = 10;
+const num2 = 7;
 const sum = num1+ num2;
 console.log('The Sum is '+sum);
 
