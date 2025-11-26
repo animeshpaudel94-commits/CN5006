@@ -1,13 +1,10 @@
 const mongoose = require('mongoose');
 
 // Use environment variables for security
-const MONGO_URI = process.env.MONGO_URI = 'mongodb+srv://admin:admin1@cluster0.ujiblay.mongodb.net/week8';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://admin:admin1@cluster0.ujiblay.mongodb.net/week8';
 
-// Connection with better options
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// Connection without deprecated options
+mongoose.connect(MONGO_URI)
 .then(() => console.log('Connected to MongoDB successfully'))
 .catch(err => console.error('Connection error:', err));
 
@@ -48,56 +45,8 @@ const PersonSchema = new mongoose.Schema({
   timestamps: true // Adds createdAt and updatedAt automatically
 });
 
-// Model creation
-const Person = mongoose.model('Person', PersonSchema, 'personCollection');
-
-// Function to create and save a single person
-async function createPerson(personData) {
-  try {
-    const person = new Person(personData);
-    const savedPerson = await person.save();
-    console.log('New person added:', savedPerson);
-    return savedPerson;
-  } catch (error) {
-    console.error('Error saving person:', error.message);
-    throw error;
-  }
-}
-
-// Function to insert multiple persons
-async function insertManyPersons(personsArray) {
-  try {
-    const result = await Person.insertMany(personsArray);
-    console.log(`Data inserted successfully. ${result.length} documents added.`);
-    return result;
-  } catch (error) {
-    console.error('Error inserting multiple persons:', error);
-    throw error;
-  }
-}
-
-// Function to find and display persons
-async function findAndDisplayPersons() {
-  try {
-    const docs = await Person.find({})
-      .sort({ Salary: 1 }) // sort ascending by Salary
-      .select("name Salary age") // select only these fields
-      .limit(10) // limit to 10 results
-      .exec();
-
-    console.log("Showing multiple documents (sorted by Salary ascending):");
-    console.log("======================================================");
-    docs.forEach(function(doc) {
-      console.log(`Name: ${doc.name}, Age: ${doc.age}, Salary: ${doc.Salary}`);
-    });
-    console.log(`Total documents found: ${docs.length}`);
-    
-    return docs;
-  } catch (err) {
-    console.error('Error finding documents:', err);
-    throw err;
-  }
-}
+// Model creation - using person_doc as per lab manual
+const person_doc = mongoose.model('Person', PersonSchema, 'personCollection');
 
 // Array of multiple persons
 const manypersons = [
@@ -110,83 +59,190 @@ const manypersons = [
   { name: 'Lisa', age: 45, Gender: "Female", Salary: 7500 }
 ];
 
-// Execute all operations in sequence
-async function main() {
+// TASK 1: Add single document (doc1.save explanation)
+async function task1() {
+  console.log("\n=== TASK 1: Adding Single Document ===");
   try {
-    // Insert single document
-    console.log("1. Inserting single document...");
-    await createPerson({
-      name: 'Animesh',
-      age: 21,
-      Gender: 'Male',
+    const doc1 = new person_doc({
+      name: 'Jacky',
+      age: 36,
+      Gender: "Male",
       Salary: 3456
     });
 
-    // Insert multiple documents
-    console.log("\n2. Inserting multiple documents...");
-    await insertManyPersons(manypersons);
+    // doc1.save() - Saves the document to MongoDB and returns a promise
+    // .then() - Handles the successful resolution of the promise
+    const savedDoc = await doc1.save();
+    console.log("New Article Has been Added Into Your DataBase:", savedDoc.name);
+    
+    // Add second document as mentioned in lab
+    const doc2 = new person_doc({
+      name: "Animesh",
+      age: 21,
+      Gender: "Male",
+      Salary: 3456
+    });
+    await doc2.save();
+    console.log("Second document added:", doc2.name);
+    
+  } catch (error) {
+    console.error("Error in Task 1:", error);
+  }
+}
 
-    // Find and display documents
-    console.log("\n3. Finding and displaying documents...");
-    await findAndDisplayPersons();
+// TASK 2: Insert multiple documents
+async function task2() {
+  console.log("\n=== TASK 2: Adding Multiple Documents ===");
+  try {
+    // insertMany() - Creates multiple documents in a single operation
+    const result = await person_doc.insertMany(manypersons);
+    console.log("Data inserted successfully. Documents added:", result.length);
+  } catch (error) {
+    console.error("Error in Task 2:", error);
+  }
+}
 
+// TASK 3: Find all documents with sorting and limiting
+async function task3() {
+  console.log("\n=== TASK 3: Fetching All Documents ===");
+  try {
+    const docs = await person_doc.find({})
+      .sort({ Salary: 1 }) // sort ascending by Salary
+      .select("name Salary age") // select only these fields
+      .limit(5) // limit to 5 results as per lab requirement
+      .exec();
+
+    console.log("Showing multiple documents (sorted by Salary ascending):");
+    docs.forEach(function(doc) {
+      console.log(`Name: ${doc.name}, Age: ${doc.age}, Salary: ${doc.Salary}`);
+    });
+    console.log(`Total documents found: ${docs.length}`);
+  } catch (err) {
+    console.error('Error in Task 3:', err);
+  }
+}
+
+// TASK 4: Find with filtering criteria
+async function task4() {
+  console.log("\n=== TASK 4: Find with Filtering Criteria ===");
+  try {
+    var givenage = 30;
+    const docs = await person_doc.find({
+      Gender: "Female",
+      age: { $gte: givenage }
+    })
+    .sort({ Salary: 1 })
+    .select('name Salary age')
+    .limit(10)
+    .exec();
+
+    console.log("Showing females with age greater than or equal to", givenage);
+    docs.forEach(function(Doc) {
+      console.log(`Age: ${Doc.age}, Name: ${Doc.name}, Salary: ${Doc.Salary}`);
+    });
+  } catch (err) {
+    console.error('Error in Task 4:', err);
+  }
+}
+
+// TASK 5: Count documents
+async function task5() {
+  console.log("\n=== TASK 5: Count Documents ===");
+  try {
+    const count = await person_doc.countDocuments().exec();
+    console.log("Total documents Count:", count);
+  } catch (err) {
+    console.error('Error in Task 5:', err);
+  }
+}
+
+// TASK 6: Delete documents
+async function task6() {
+  console.log("\n=== TASK 6: Delete Documents ===");
+  try {
+    const result = await person_doc.deleteMany({ age: { $gte: 25 } }).exec();
+    console.log('Deleted documents count:', result.deletedCount);
+  } catch (error) {
+    console.error('Error in Task 6:', error);
+  }
+}
+
+// TASK 7: Update documents
+async function task7() {
+  console.log("\n=== TASK 7: Update Documents ===");
+  try {
+    // First let's add some female records to update
+    const femalePersons = [
+      { name: 'Anna', age: 29, Gender: "Female", Salary: 4000 },
+      { name: 'Sophia', age: 31, Gender: "Female", Salary: 5200 }
+    ];
+    await person_doc.insertMany(femalePersons);
+
+    const result = await person_doc.updateMany( 
+      { Gender: "Female" },
+      { Salary: 5555 }  
+    ).exec();
+    
+    console.log("Update successful - Modified count:", result.modifiedCount);
+    
+    // Show the updated records
+    const updatedFemales = await person_doc.find({ Gender: "Female" }).select('name Salary').exec();
+    console.log("Updated female records:");
+    updatedFemales.forEach(doc => {
+      console.log(`Name: ${doc.name}, Salary: ${doc.Salary}`);
+    });
+  } catch (error) {
+    console.error('Error in Task 7:', error);
+  }
+}
+
+// Execute all tasks in sequence
+async function executeAllTasks() {
+  try {
+    // Wait for connection to be established
+    if (mongoose.connection.readyState !== 1) {
+      await new Promise(resolve => db.once('connected', resolve));
+    }
+
+    await task1();
+    await task2();
+    await task3();
+    await task4();
+    await task5();
+    
+    // Wait a bit before delete operation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await task6();
+    
+    // Wait before update operation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await task7();
+
+    console.log("\n=== ALL TASKS COMPLETED ===");
+    
   } catch (error) {
     console.error('Error in main execution:', error);
   } finally {
     // Close connection after operations
-    // mongoose.connection.close();
+    setTimeout(() => {
+      mongoose.connection.close();
+      console.log('Database connection closed');
+    }, 5000);
   }
 }
 
-// Alternative way using your original syntax for find
-Person.find({})
-  .sort({ Salary: 1 })
-  .select("name Salary age")
-  .limit(10)
-  .exec()
-  .then(docs => {
-    console.log("\nAlternative find method - Showing multiple documents:");
-    console.log("======================================================");
-    docs.forEach(function(doc) {
-      console.log(`Age: ${doc.age}, Name: ${doc.name}, Salary: ${doc.Salary}`);
-    });
-  })
-  .catch(err => {
-    console.error(err);
-  });
-
-// EXACT CODE FROM SCREENSHOTS (FIXED VERSION)
-var givenage = 30;
-
-Person.find({
-  Gender: "Female",
-  age: { $gte: givenage }
-})
-// find all users
-.sort({ Salary: 1 })    // sort ascending by Salary
-.select('name Salary age') // Name and salary only
-.limit(10)    // limit to 10 items
-.exec()    // execute the query
-.then(docs => {
-  console.log("showing age greater than or equal to", givenage);
-  
-  docs.forEach(function(Doc) {
-    console.log(Doc.age, Doc.name);
-  });
-})
-.catch(err => {
-  console.error(err);
-});
-
-
-
 // Export for use in other files
 module.exports = {
-  Person,
-  createPerson,
-  insertManyPersons,
-  findAndDisplayPersons
+  person_doc,
+  task1,
+  task2,
+  task3,
+  task4,
+  task5,
+  task6,
+  task7,
+  executeAllTasks
 };
 
-// Uncomment the line below to run the main function
-// main();
+// Run all tasks
+executeAllTasks();
