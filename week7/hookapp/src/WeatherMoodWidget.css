@@ -1,0 +1,67 @@
+.weather-widget {
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px;
+    background: #f9f9f9;
+    text-align: center;
+    max-width: 300px;
+}
+
+.weather-widget h3 {
+    color: #333;
+    text-transform: capitalize;
+    margin-bottom: 15px;
+}
+
+.weather-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    margin: 10px 0;
+    border: 2px solid #ddd;
+}
+
+.mood-section {
+    margin: 15px 0;
+}
+
+.mood-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+}
+
+.mood-button:hover {
+    background: #45a049;
+}
+
+.count-badge {
+    background: white;
+    color: #4CAF50;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.weather-stats {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.weather-stats strong {
+    color: #4CAF50;
+}
