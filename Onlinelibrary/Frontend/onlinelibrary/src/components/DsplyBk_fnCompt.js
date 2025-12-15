@@ -1,18 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import DisplayData from './DisplayData';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import DisplayData from "./DisplayData";
 
 function FncDisplayBooks() {
   const [Books, setBooks] = useState([]);
-  const url = "http://localhost:5000/allbooks";
+
+  // ✅ FIXED: Codespaces backend URL
+  const url =
+    "https://super-duper-space-broccoli-pj5pqj4r46g9f6j9w-5000.app.github.dev/allbooks";
 
   useEffect(() => {
-    axios.get(url)
-      .then(res => {
+    axios
+      .get(url)
+      .then((res) => {
         setBooks(res.data);
       })
-      .catch(err => {
-        console.log("Error occurred:", err);
+      .catch((err) => {
+        console.error("Error occurred:", err);
         alert("Error fetching books!");
       });
   }, []);
